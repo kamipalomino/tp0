@@ -2,7 +2,7 @@
 
 int main() {
   configure_logger();
-  int socket = connect_to_server(IP, PUERTO);
+  int socket = connect_to_server(HOST, PUERTO);
   wait_hello(socket);
   Alumno alumno = read_hello();
   send_hello(socket, alumno);
@@ -19,7 +19,8 @@ void configure_logger() {
         mostrarse por pantalla y mostrar solo los logs de nivel info para arriba
         (info, warning y error!)
   */
-  // logger = /* 1. */;
+	//bool is_active_console = "true";
+	logger = log_create("tp0.log","tp0",mostrarPorConola,0);
 }
 
 int connect_to_server(char * ip, char * port) {
@@ -27,19 +28,21 @@ int connect_to_server(char * ip, char * port) {
   struct addrinfo *server_info;
 
   memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_UNSPEC;    // Permite que la maquina se encargue de verificar si usamos IPv4 o IPv6
-  hints.ai_socktype = SOCK_STREAM;  // Indica que usaremos el protocolo TCP
+  hints.ai_family = 0;//AF_UNIX;    // Permite que la maquina se encargue de verificar si usamos IPv4 o IPv6
+  hints.ai_socktype = 0;//SOCK_STREAM;  // Indica que usaremos el protocolo TCP
 
   getaddrinfo(ip, port, &hints, &server_info);  // Carga en server_info los datos de la conexion
 
   // 2. Creemos el socket con el nombre "server_socket" usando la "server_info" que creamos anteriormente
-  int server_socket = 0; //Eliminar esta linea luego de completar la anterior
+  int server_socket = socket(server_info->ai_family, server_info->ai_socktype, 0); //Eliminar esta linea luego de completar la anterior
   // int server_socket = socket(/* familia, socktype, protocolo */);
 
   // 3. Conectemosnos al server a traves del socket! Para eso vamos a usar connect()
-  // int retorno = connect(/* socket, address, longitud de la address */);
+  int retorno = connect(server_socket, server_info->ai_addr, sizeof(server_info->ai_addr));
+  freeaddrinfo(server_info);  // No lo necesitamos masai
 
-  freeaddrinfo(server_info);  // No lo necesitamos mas
+  chequear(retorno);
+  log_info(logger, "Conectado!");
 
   /*
     3.1 Recuerden chequear por si no se pudo contectar (usando el retorno de connect()).
@@ -49,12 +52,12 @@ int connect_to_server(char * ip, char * port) {
   */
 
   // 4 Logeamos que pudimos conectar y retornamos el socket
-  log_info(logger, "Conectado!");
+
   return server_socket;
 }
 
 void  wait_hello(int socket) {
-  char * hola = "SYSTEM UTNSO 0.1";
+  char* hola = "SYSTEM UTNSO 0.1";
 
   /*
     5.  Ya conectados al servidor, vamos a hacer un handshake!
@@ -64,7 +67,8 @@ void  wait_hello(int socket) {
         variable "hola". Entonces, vamos por partes:
         5.1.  Reservemos memoria para un buffer para recibir el mensaje.
   */
-  // char * buffer = malloc(/*5.1*/);
+  char* buffer = malloc(sizeof(hola));
+  int result_recv= recv(socket, buffer, sizeof(buffer), 0);
   /*
         5.2.  Recibamos el mensaje en el buffer.
         Recuerden el prototipo de recv:
@@ -72,6 +76,17 @@ void  wait_hello(int socket) {
         Nota: Palabra clave MSG_WAITALL.
   */
   // int result_recv = recv(/*5.2*/);
+  chequear(result_recv);
+  string_equals_ignore_case(buffer, hola);
+
+  if(mostrarPorConola == string_equals_ignore_case){
+	  log_info(logger,"Se recibió lo esperado \n");
+
+  } else {
+	  log_error(logger, "No coincide el mensaje con lo esperado");
+	  free(buffer);
+	  exit_gracefully(1);
+  };
   /*
         5.3.  Chequiemos errores al recibir! (y logiemos, por supuesto)
         5.4.  Comparemos lo recibido con "hola".
@@ -79,7 +94,7 @@ void  wait_hello(int socket) {
         No se olviden de loggear y devolver la memoria que pedimos!
         (si, también si falló algo, tenemos que devolverla, atenti.)
   */
-
+  free(buffer);
 }
 
 Alumno read_hello() {
@@ -91,7 +106,7 @@ Alumno read_hello() {
           que como se va a enviar toda la estructura completa, para evitar problemas
           con otros otros lenguajes
   */
-  Alumno alumno = { .nombre = "", .apellido = "" };
+  Alumno alumno;
 
   /*
     7.    Pero como conseguir los datos? Ingresemoslos por consola!
@@ -99,7 +114,9 @@ Alumno read_hello() {
           Vamos a recibir, primero el legajo, despues el nombre y
           luego el apellido
   */
-  char * legajo = readline("Legajo: ");
+  char* name = readline("Nombre: \n");
+  char* surname = readLine("Apellido: \n");
+  char* legajo = readline("Legajo: \n");
 
   /*
     8.    Realine nos va a devolver un cacho de memoria ya reservada
@@ -111,14 +128,19 @@ Alumno read_hello() {
   */
 
   alumno.legajo = atoi(legajo);
-  free(legajo);
-
   /*
     9.    Para el nombre y el apellido no hace falta convertirlos porque
           ambos son cadenas de caracteres, por los que solo hace falta
           copiarlos usando memcpy a la estructura y liberar la memoria
           pedida por readline.
   */
+
+  memcpy(alumno.nombre,name,strle(name));
+  memcpy(alumno.apellido,surname,strle(surname));
+  free(legajo);
+  free(name);
+  free(surname);
+
   // char * nombre = /* ??? */;
   // Usemos memcpy(destino, origen, cant de bytes).
   // Para la cant de bytes nos conviene usar strlen dado que son cadenas
@@ -143,9 +165,9 @@ void send_hello(int socket, Alumno alumno) {
     11.1. Como algo extra, podes probar enviando caracteres invalidos en el nombre
           o un id de otra operacion a ver que responde el servidor y como se
           comporta nuestro cliente.
-  */  
+  */
 
-  // alumno.id = 33;
+  alumno.id = 99;
   // alumno.nombre[2] = -4;
 
   /*
@@ -154,9 +176,9 @@ void send_hello(int socket, Alumno alumno) {
           por lo que no tiene padding y la podemos mandar directamente sin necesidad
           de un buffer y usando el tamaño del tipo Alumno!
   */
-  
+
   int resultado = 0; //Eliminar esta linea luego de completar la anteri
-  // int resultado = (send(/* ?? */, &alumno, /* ??? */, 0);
+   int resultado = (send(/* ?? */, &alumno, /* ??? */, 0);
 
   if(resultado <= 0) {
     /*
@@ -248,4 +270,12 @@ void exit_gracefully(int return_nr) {
           Asi solo necesitamos destruir el logger y usar la llamada al
           sistema exit() para terminar la ejecucion
   */
+}
+void chequear(int validar){
+	if(validar == -1){
+	  		log_error(logger, "Error");
+	  		exit_gracefully(1);
+	  	}else{
+	  		log_info(logger, "Todo bien!");
+	  	};
 }
