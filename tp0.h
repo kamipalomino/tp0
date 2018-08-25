@@ -14,22 +14,25 @@
 
 // Aca incluimos las bibliotecas que vamos a usar
 #include <stdio.h> // Por dependencia de readline en algunas distros de linux :)
-#include <openssl/md5.h> // Para calcular el MD5
+//#include <openssl/md5.h> // Para calcular el MD5
 #include <string.h>
 #include <stdlib.h> // Para malloc
-#include <sys/socket.h> // Para crear sockets, enviar, recibir, etc
+#include <linux/socket.h> // Para crear sockets, enviar, recibir, etc
 #include <netdb.h> // Para getaddrinfo
 #include <unistd.h> // Para close
 #include <readline/readline.h> // Para usar readline
 #include <commons/log.h>
 #include <commons/collections/list.h>
-
+#include <sys/types.h>
+#include <stdbool.h>
 // Definimos algunas constantes para nuestro código
 #define IP "127.0.0.1"
 #define PUERTO "8080"
+#define HOST "tp0.utnso.com"
 
 // Definimos algunas variables globales
-t_log * logger;
+struct t_log* logger;
+#define mostrarPorConola 0 == 0
 
 // A continuacion estan las estructuras con las que nos vamos a manejar.
 typedef struct  {
@@ -54,4 +57,5 @@ void * wait_content(int socket);
 void send_md5(int socket, void * content);
 void wait_confirmation(int socket);
 void exit_gracefully(int return_nr);
+void chequear(int validar);
 #endif /* CLIENTE_H_ */
