@@ -14,10 +14,10 @@
 
 // Aca incluimos las bibliotecas que vamos a usar
 #include <stdio.h> // Por dependencia de readline en algunas distros de linux :)
-//#include <openssl/md5.h> // Para calcular el MD5
+#include <openssl/md5.h> // Para calcular el MD5
 #include <string.h>
 #include <stdlib.h> // Para malloc
-#include <linux/socket.h> // Para crear sockets, enviar, recibir, etc
+#include <sys/socket.h> // Para crear sockets, enviar, recibir, etc
 #include <netdb.h> // Para getaddrinfo
 #include <unistd.h> // Para close
 #include <readline/readline.h> // Para usar readline
@@ -26,7 +26,7 @@
 #include <sys/types.h>
 #include <stdbool.h>
 // Definimos algunas constantes para nuestro código
-#define IP "127.0.0.1"
+#define IP "tp0.utnso.com"//"127.0.0.1"
 #define PUERTO "8080"
 #define HOST "tp0.utnso.com"
 

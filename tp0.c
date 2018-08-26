@@ -13,8 +13,8 @@ int main() {
 }
 
 void configure_logger() {
-  /*
-    1.  Creemos el logger con la funcion de las commons log_create.
+	/*
+	 TODO 1.  Creemos el logger con la funcion de las commons log_create.
         Tiene que: guardarlo en el archivo tp0.log, mostrar 'tp0' al loggear,
         mostrarse por pantalla y mostrar solo los logs de nivel info para arriba
         (info, warning y error!)
@@ -28,16 +28,17 @@ int connect_to_server(char * ip, char * port) {
   struct addrinfo *server_info;
 
   memset(&hints, 0, sizeof(hints));
-  hints.ai_family = 0;//AF_UNIX;    // Permite que la maquina se encargue de verificar si usamos IPv4 o IPv6
-  hints.ai_socktype = 0;//SOCK_STREAM;  // Indica que usaremos el protocolo TCP
+	hints.ai_family = 0; // Permite que la maquina se encargue de verificar si usamos IPv4 o IPv6
+	hints.ai_socktype = 1; //SOCK_STREAM = 1;  // Indica que usaremos el protocolo TCP
 
   getaddrinfo(ip, port, &hints, &server_info);  // Carga en server_info los datos de la conexion
 
-  // 2. Creemos el socket con el nombre "server_socket" usando la "server_info" que creamos anteriormente
-  int server_socket = socket(server_info->ai_family, server_info->ai_socktype, 0); //Eliminar esta linea luego de completar la anterior
+	//  TODO 2. Creemos el socket con el nombre "server_socket" usando la "server_info" que creamos anteriormente
+	int server_socket = socket(server_info->ai_family, server_info->ai_socktype,
+			0); //Eliminar esta linea luego de completar la anterior
   // int server_socket = socket(/* familia, socktype, protocolo */);
 
-  // 3. Conectemosnos al server a traves del socket! Para eso vamos a usar connect()
+	//  TODO 3. Conectemosnos al server a traves del socket! Para eso vamos a usar connect()
   int retorno = connect(server_socket, server_info->ai_addr, sizeof(server_info->ai_addr));
   freeaddrinfo(server_info);  // No lo necesitamos masai
 
@@ -45,13 +46,13 @@ int connect_to_server(char * ip, char * port) {
   log_info(logger, "Conectado!");
 
   /*
-    3.1 Recuerden chequear por si no se pudo contectar (usando el retorno de connect()).
+	 TODO 3.1 Recuerden chequear por si no se pudo contectar (usando el retorno de connect()).
         Si hubo un error, lo loggeamos y podemos terminar el programa con la funcioncita
         exit_gracefully pasandole 1 como parametro para indicar error ;).
         Pss, revisen los niveles de log de las commons.
   */
 
-  // 4 Logeamos que pudimos conectar y retornamos el socket
+	//  TODO 4  Logeamos que pudimos conectar y retornamos el socket
 
   return server_socket;
 }
@@ -98,8 +99,7 @@ void  wait_hello(int socket) {
 }
 
 Alumno read_hello() {
-  /*
-    6.    Ahora nos toca mandar a nosotros un mensaje de hola.
+	/*    TODO  6.    Ahora nos toca mandar a nosotros un mensaje de hola.
           que van a ser nuestros datos, definamos una variable de tipo Alumno.
           Alumno es esa estructura que definimos en el .h.
           Recuerden definir el nombre y apellido como cadenas varias, dado
@@ -108,35 +108,33 @@ Alumno read_hello() {
   */
   Alumno alumno;
 
-  /*
-    7.    Pero como conseguir los datos? Ingresemoslos por consola!
+	/*     TODO 7.     Pero como conseguir los datos? Ingresemoslos por consola!
           Para eso, primero leamos por consola usando la biblioteca realine.
           Vamos a recibir, primero el legajo, despues el nombre y
           luego el apellido
   */
   char* name = readline("Nombre: \n");
-  char* surname = readLine("Apellido: \n");
+	char* surname = readline("Apellido: \n");
   char* legajo = readline("Legajo: \n");
 
   /*
-    8.    Realine nos va a devolver un cacho de memoria ya reservada
+	 TODO  8.    Realine nos va a devolver un cacho de memoria ya reservada
           con lo que leyo del teclado hasta justo antes del enter (/n).
           Ahora, nos toca copiar el legajo al la estructura alumno. Como
           el legajo es numero, conviertanlo a numero con la funcion atoi
           y asignenlo.
           Recuerden liberar la memoria pedida por readline con free()!
   */
-
   alumno.legajo = atoi(legajo);
   /*
-    9.    Para el nombre y el apellido no hace falta convertirlos porque
+	 TODO  9.    Para el nombre y el apellido no hace falta convertirlos porque
           ambos son cadenas de caracteres, por los que solo hace falta
           copiarlos usando memcpy a la estructura y liberar la memoria
           pedida por readline.
   */
 
-  memcpy(alumno.nombre,name,strle(name));
-  memcpy(alumno.apellido,surname,strle(surname));
+	memcpy(alumno.nombre, name, strlen(name));
+	memcpy(alumno.apellido, surname, strlen(surname));
   free(legajo);
   free(name);
   free(surname);
@@ -146,84 +144,83 @@ Alumno read_hello() {
   // Para la cant de bytes nos conviene usar strlen dado que son cadenas
   // de caracteres que cumplen el formato de C (terminar en \0)
 
-  // 9.1. Faltaría armar el del apellido
+	//  TODO 9.1. Faltaría armar el del apellido
 
-  // 10. Finalmente retornamos la estructura
+	//  TODO 10.  Finalmente retornamos la estructura
   return alumno;
 }
 
 void send_hello(int socket, Alumno alumno) {
   log_info(logger, "Enviando info de Estudiante");
   /*
-    11.   Ahora SI nos toca mandar el hola con los datos del alumno.
+	 TODO  11.   Ahora SI nos toca mandar el hola con los datos del alumno.
           Pero nos falta algo en nuestra estructura, el id_mensaje del protocolo.
           Segun definimos, el tipo de id para un mensaje de tamaño fijo con
           la informacion del alumno es el id 99
   */
 
   /*
-    11.1. Como algo extra, podes probar enviando caracteres invalidos en el nombre
+	 TODO  11.1.  Como algo extra, podes probar enviando caracteres invalidos en el nombre
           o un id de otra operacion a ver que responde el servidor y como se
           comporta nuestro cliente.
   */
 
-  alumno.id = 99;
-  // alumno.nombre[2] = -4;
+	alumno.id_mensaje = 99;	//alumno.id_mensaje = 15;   // alumno.nombre[2] = -4;
 
   /*
-    12.   Finalmente, enviemos la estructura por el socket!
+	 TODO 11.2   Finalmente, enviemos la estructura por el socket!
           Recuerden que nuestra estructura esta definida como __attribute__((packed))
           por lo que no tiene padding y la podemos mandar directamente sin necesidad
           de un buffer y usando el tamaño del tipo Alumno!
   */
 
   int resultado = 0; //Eliminar esta linea luego de completar la anteri
-   int resultado = (send(/* ?? */, &alumno, /* ??? */, 0);
+	// int resultado = (send(buffer, &alumno, , 0);
 
   if(resultado <= 0) {
     /*
-      12.1. Recuerden que si hay error, hay que salir y tenemos que cerrar el socket (ademas de loggear)!
+		 TODO  12.1. Recuerden que si hay error, hay que salir y tenemos que cerrar el socket (ademas de loggear)!
     */
   }
 }
 
 void * wait_content(int socket) {
   /*
-    13.   Ahora tenemos que recibir un contenido de tamaño variable
+	 TODO 13.   Ahora tenemos que recibir un contenido de tamaño variable
           Para eso, primero tenemos que confirmar que el id corresponde al de una
           respuesta de contenido variable (18) y despues junto con el id de operacion
           vamos a haber recibido el tamaño del contenido que sigue. Por lo que:
   */
 
   log_info(logger, "Esperando el encabezado del contenido(%ld bytes)", sizeof(ContentHeader));
-  // 13.1. Reservamos el suficiente espacio para guardar un ContentHeader
+	//  TODO 13.1. Reservamos el suficiente espacio para guardar un ContentHeader
   ContentHeader * header = 0;//malloc(/* 8.1. */);
 
-  // 13.2. Recibamos el header en la estructura y chequiemos si el id es el correcto.
+	//  TODO 13.2. Recibamos el header en la estructura y chequiemos si el id es el correcto.
   //      No se olviden de validar los errores, liberando memoria y cerrando el socket!
 
   log_info(logger, "Esperando el contenido (%d bytes)", header->len);
 
   /*
-      14.   Ahora, recibamos el contenido variable. Ya tenemos el tamaño,
+	 TODO  14.   Ahora, recibamos el contenido variable. Ya tenemos el tamaño,
             por lo que reecibirlo es lo mismo que veniamos haciendo:
-      14.1. Reservamos memoria
-      14.2. Recibimos el contenido en un buffer (si hubo error, fallamos, liberamos y salimos
+	 TODO  14.1. Reservamos memoria
+	 TODO 14.2. Recibimos el contenido en un buffer (si hubo error, fallamos, liberamos y salimos
   */
 
   /*
-      15.   Finalmente, no te olvides de liberar la memoria que pedimos
+	 TODO  15.   Finalmente, no te olvides de liberar la memoria que pedimos
             para el header y retornar el contenido recibido.
   */
 }
 
 void send_md5(int socket, void * content) {
   /*
-    16.   Ahora calculemos el MD5 del contenido, para eso vamos
+	 TODO 16.   Ahora calculemos el MD5 del contenido, para eso vamos
           a armar el digest:
   */
 
-  void * digest = malloc(MD5_DIGEST_LENGTH);
+	void * digest = malloc(16);
   MD5_CTX context;
   MD5_Init(&context);
   MD5_Update(&context, content, strlen(content) + 1);
@@ -232,23 +229,23 @@ void send_md5(int socket, void * content) {
   free(content);
 
   /*
-    17.   Luego, nos toca enviar a nosotros un contenido variable.
+	 TODO 17.   Luego, nos toca enviar a nosotros un contenido variable.
           A diferencia de recibirlo, para mandarlo es mejor enviarlo todo de una,
           siguiendo la logida de 1 send - N recv.
           Asi que:
   */
 
-  //      17.1. Creamos un ContentHeader para guardar un mensaje de id 33 y el tamaño del md5
+	//      TODO  17.1. Creamos un ContentHeader para guardar un mensaje de id 33 y el tamaño del md5
 
   // ContentHeader header = { /* 17.1. */ };
 
   /*
-          17.2. Creamos un buffer del tamaño del mensaje completo y copiamos el header y la info de "digest" allí.
+	 TODO  17.2. Creamos un buffer del tamaño del mensaje completo y copiamos el header y la info de "digest" allí.
           Recuerden revisar la función memcpy(ptr_destino, ptr_origen, tamaño)!
   */
 
   /*
-    18.   Con todo listo, solo nos falta enviar el paquete que armamos y liberar la memoria que usamos.
+	 TODO  18.   Con todo listo, solo nos falta enviar el paquete que armamos y liberar la memoria que usamos.
           Si, TODA la que usamos, eso incluye a la del contenido del mensaje que recibimos en la función
           anterior y el digest del MD5. Obviamente, validando tambien los errores.
   */
@@ -257,7 +254,7 @@ void send_md5(int socket, void * content) {
 void wait_confirmation(int socket) {
   int result = 0; // Dejemos creado un resultado por defecto
   /*
-    19.   Ahora nos toca recibir la confirmación del servidor.
+	 TODO 19.   Ahora nos toca recibir la confirmación del servidor.
           Si el resultado obtenido es distinto de 1, entonces hubo un error
   */
 
@@ -266,7 +263,7 @@ void wait_confirmation(int socket) {
 
 void exit_gracefully(int return_nr) {
   /*
-    20.   Siempre llamamos a esta funcion para cerrar el programa.
+	 TODO 20.   Siempre llamamos a esta funcion para cerrar el programa.
           Asi solo necesitamos destruir el logger y usar la llamada al
           sistema exit() para terminar la ejecucion
   */
